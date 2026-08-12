@@ -1,0 +1,23 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+authors = [
+    { name = "CommandlineCoding", email = "info@commandlinecoding.in" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.1",
+    "psycopg[binary]>=3.3.4",
+]
+
+[project.scripts]
+backend = "backend:main"
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = false
