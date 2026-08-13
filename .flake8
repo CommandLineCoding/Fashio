@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203
+
+# Allow star imports specifically in settings modules
+per-file-ignores =
+    config/settings/*.py: F401, F403, F405
+
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    */migrations/*
