@@ -1,0 +1,39 @@
+name: Frontend Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: check prettier formatting
+        working-directory: frontend
+        run: npm run format:check
+
+      - name: Run ESling
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Build project
+        working-directory: frontend
+        run: npm run build
