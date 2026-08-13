@@ -1,13 +1,16 @@
-services:
+name: fashio
+
+services:  
   db:
     image: postgres:16-alpine
-    container_name: fashio
+    container_name: fashio-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -16,34 +19,89 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
+  migration:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: fashio-backend
-    restart: unless-stopped
-    command: uv run python manage.py runserver ${HOST}:${PORT}
+      target: development
+    container_name: fashio-migration
+    userns_mode: "keep-id"
+    tmpfs:
+      - /tmp
+    command: uv run python manage.py migrate --noinput
     volumes:
-      - ./backend:/app
-    ports:
-      - "${PORT}:${PORT}"
+      - ./backend:/app:z
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.local
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      JWT_SECRETS: ${JWT_SECRET}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECERTS: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
-      GITHUB_CLIENT_SECRETS: ${GITHUB_CLIENT_SECRET}
-      GITHUB_CLIENT_URL: ${GITHUB_REDIRECT_URL}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_REDIRECT_URL: ${GITHUB_REDIRECT_URL}
     depends_on:
       db:
         condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: fashio-backend
+    restart: unless-stopped
+    userns_mode: "keep-id"
+    tmpfs:
+      - /tmp
+    command: uv run python manage.py runserver 0.0.0.0:${BACKEND_PORT:-8000}
+    volumes:
+      - ./backend:/app:z
+    ports:
+      - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_REDIRECT_URL: ${GITHUB_REDIRECT_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: fashio-frontend
+    restart: unless-stopped
+    userns_mode: "keep-id"
+    command: npm run dev -- --host
+    volumes:
+      - ./frontend:/app:z
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:${BACKEND_PORT:-8000}
+    depends_on:
+      - backend
 
 volumes:
   pgdata:

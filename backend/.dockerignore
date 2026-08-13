@@ -1,5 +1,13 @@
 .venv
 __pycache__
 *.pyc
+*.pyo
+*.pyd
 .git
+.gitignore
 .env
+.pytest_cache
+.coverage
+htmlcov
+media
+staticfiles

@@ -1,8 +1,16 @@
-name: Backend Tests
+name: Backend CI
 
 on:
   push:
+    branches: [ main, dev ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
   pull_request:
+    branches: [ main, dev ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
 
 permissions:
   contents: read
@@ -10,19 +18,32 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      POSTGRES_DB: fashio_test_db
+      POSTGRES_USER: fashio_test_user
+      POSTGRES_PASSWORD: fashio_test_password
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      JWT_SECRET: test-jwt-secret-key-for-ci-pipeline
+
+    defaults:
+      run:
+        working-directory: backend
 
     services:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: ${{ vars.POSTGRES_USER || 'fashio_admin' }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'local_test_password' }}
-          POSTGRES_DB: ${{ vars.POSTGRES_DB || 'fashio_db' }}
+          POSTGRES_DB: fashio_test_db
+          POSTGRES_USER: fashio_test_user
+          POSTGRES_PASSWORD: fashio_test_password
         ports:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
+          --health-interval 5s
           --health-timeout 5s
           --health-retries 5
 
@@ -30,27 +51,24 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Install uv and set up python
+      - name: Install uv and enable caching
         uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
           enable-cache: true
           cache-dependency-lock-file: "backend/uv.lock"
 
-      - name: Install dependencies
-        working-directory: backend
+      - name: Ensure Python 3.12 is installed
+        run: uv python install 3.12
+
+      - name: Install project dependencies
         run: uv sync --frozen
 
-      - name: Run flake8
-        working-directory: backend
-        run: |
-          uv run flake8 . --exclude=.venv --count --select=E9,F63,F7,F82 --show-source --statistics
-          uv run flake8 . --exclude=.venv --count --exit-zero --max-complexity=10 --max-line-length=119 --statistics
+      - name: Lint code with Ruff
+        run: uv run ruff check .
 
-      - name: Run black check
-        working-directory: backend
-        run: uvx black --check --verbose .
+      - name: Check code formatting with Ruff
+        run: uv run ruff format --check .
 
-      - name: Run pytest
-        working-directory: backend
+      - name: Run Pytest suite
         run: uv run pytest
