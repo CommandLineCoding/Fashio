@@ -1,0 +1,56 @@
+name: Backend Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ${{ vars.POSTGRES_USER || 'fashio_admin' }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'local_test_password' }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB || 'fashio_db' }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Install uv and set up python
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-lock-file: "backend/uv.lock"
+
+      - name: Install dependencies
+        working-directory: backend
+        run: uv sync --frozen
+
+      - name: Run flake8
+        working-directory: backend
+        run: |
+          uv run flake8 . --exclude=.venv --count --select=E9,F63,F7,F82 --show-source --statistics
+          uv run flake8 . --exclude=.venv --count --exit-zero --max-complexity=10 --max-line-length=119 --statistics
+
+      - name: Run black check
+        working-directory: backend
+        run: uvx black --check --verbose .
+
+      - name: Run pytest
+        working-directory: backend
+        run: uv run pytest

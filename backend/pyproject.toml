@@ -21,3 +21,11 @@ build-backend = "uv_build"
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "black>=26.5.1",
+    "flake8>=7.3.0",
+    "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
+]
