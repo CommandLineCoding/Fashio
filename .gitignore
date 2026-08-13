@@ -67,3 +67,5 @@ docker-compose.override.yml
 *.swp
 *.swo
 *~
+
+act-history.json
