@@ -47,3 +47,8 @@ select = [
     "I",  # isort (import sorting)
     "UP", # pyupgrade
 ]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.local"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+addopts = "--strict-markers --no-migrations"
