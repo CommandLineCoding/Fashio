@@ -1,31 +1,49 @@
 [project]
-name = "backend"
+name = "Fashio"
 version = "0.1.0"
-description = ""
+description = "Fashio REST API Backend"
 readme = "README.md"
 authors = [
     { name = "CommandlineCoding", email = "info@commandlinecoding.in" }
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "django>=6.1",
-    "psycopg[binary]>=3.3.4",
+    # Core Framework & REST API
+    "django>=5.1,<6.0",
+    "djangorestframework>=3.15.0",
+    "djangorestframework-simplejwt>=5.3.1",
+    "django-cors-headers>=4.4.0",
+    
+    # Database
+    "psycopg[binary]>=3.2.0",
+    
+    # Production WSGI Server
+    "gunicorn>=23.0.0",
+    
+    # Utilities & OAuth Integrations
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.0",
 ]
-
-[project.scripts]
-backend = "backend:main"
-
-[build-system]
-requires = ["uv_build>=0.12.3,<0.13.0"]
-build-backend = "uv_build"
 
 [tool.uv]
 package = false
 
 [dependency-groups]
 dev = [
-    "black>=26.5.1",
-    "flake8>=7.3.0",
-    "pytest>=9.1.1",
-    "pytest-django>=4.14.0",
+    "pytest>=8.3.0",
+    "pytest-django>=4.9.0",
+    "ruff>=0.6.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # Pyflakes
+    "I",  # isort (import sorting)
+    "UP", # pyupgrade
 ]
