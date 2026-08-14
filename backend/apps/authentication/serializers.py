@@ -8,7 +8,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "email", "password"]
+        fields = ("username", "email", "password")
 
     def validate_username(self, value):
         if not all(char.isalnum() or char == "_" for char in value):
