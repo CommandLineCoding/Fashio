@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import UserProfile
-from .serializers import RegisterSerializer
+from .serializers import LoginSerializer, RegisterSerializer
 
 
 class RegisterationView(generics.CreateAPIView):
@@ -34,4 +34,31 @@ class RegisterationView(generics.CreateAPIView):
                 },
             },
             status=status.HTTP_201_CREATED,
+        )
+
+
+class LoginView(generics.CreateAPIView):
+    serializer_class = LoginSerializer
+
+    def create(self, request, *args, **kwags):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        profile = UserProfile.objects.get(user=user)
+        return Response(
+            {
+                "success": True,
+                "data": {
+                    "tokens": {
+                        "access_token": serializer.validated_data["access_token"],
+                        "refresh_token": serializer.validated_data["refresh_token"],
+                    },
+                    "user": {
+                        "id": str(profile.id),
+                        "username": user.username,
+                        "created_at": user.date_joined,
+                    },
+                },
+            },
+            status=status.HTTP_200_OK,
         )
