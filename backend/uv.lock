@@ -161,6 +161,16 @@ wheels = [
 ]
 
 [[package]]
+name = "dj-rest-auth"
+version = "7.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "djangorestframework" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/14/fd/c8a185a98f6860b802dc5e663c652efc01cd68f4e046c65f8cb9328c0077/dj_rest_auth-7.2.0.tar.gz", hash = "sha256:f77af37da5cf6ee28f03f283a378a2f5761860e72d1d6f2fa3d50e6286000482", size = 490126, upload-time = "2026-03-15T04:05:39.272Z" }
+
+[[package]]
 name = "django"
 version = "5.2.17"
 source = { registry = "https://pypi.org/simple" }
@@ -172,6 +182,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d5/d8/43e9d000519adceb189620b6869ff88031e046df91c2e9da72f8f6918399/django-5.2.17.tar.gz", hash = "sha256:9d4d93be539a18ab80d058eb515900e10951e04c537c5a6b394fc49528d3251f", size = 10889740, upload-time = "2026-08-04T15:04:03.173Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/df/f8/ce120525ca78f12b07daf65786679c5d0b54a75285a8958d3ae55e39da35/django-5.2.17-py3-none-any.whl", hash = "sha256:f04fb3b36ee119e1af4fa1d397d5fd6cf12700f49321e84d4f4c642c5b1973db", size = 8315563, upload-time = "2026-08-04T15:03:59.1Z" },
+]
+
+[[package]]
+name = "django-allauth"
+version = "65.19.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asgiref" },
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cf/93/776a61df6ce71f82e98afa1938c6e540ec239a8f80b2747c3c33cb9581cc/django_allauth-65.19.1.tar.gz", hash = "sha256:999d01d5c422a82734cf5804df9f5a0d1d4ddd6acbb2f807db976ed7d49f9cb3", size = 2286662, upload-time = "2026-08-13T10:02:17.956Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/f6/3c5f838f2e66903b422ae45f8f44b9e5da6457a4d4da125d426b339d86c8/django_allauth-65.19.1-py3-none-any.whl", hash = "sha256:5c507b53c45d2b7cbfcac7643d0123d5f0a7df7d43a882edcdbedb5f6b396421", size = 2074420, upload-time = "2026-08-13T10:02:26.339Z" },
 ]
 
 [[package]]
@@ -218,7 +241,9 @@ name = "fashio"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "dj-rest-auth" },
     { name = "django" },
+    { name = "django-allauth" },
     { name = "django-cors-headers" },
     { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
@@ -237,7 +262,9 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "dj-rest-auth", specifier = ">=7.2.0" },
     { name = "django", specifier = ">=5.1,<6.0" },
+    { name = "django-allauth", specifier = ">=65.19.1" },
     { name = "django-cors-headers", specifier = ">=4.4.0" },
     { name = "djangorestframework", specifier = ">=3.15.0" },
     { name = "djangorestframework-simplejwt", specifier = ">=5.3.1" },
