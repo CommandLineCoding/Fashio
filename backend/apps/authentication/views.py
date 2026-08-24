@@ -71,14 +71,6 @@ class LoginView(generics.CreateAPIView):
         )
 
 
-"""  
-class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
-    client_class = OAuth2Client
-    callback_url = "http://127.0.0.1:8000/accounts/google/login/callback/"
-"""
-
-
 class OAuthLoginView(APIView):
     permission_classes = [AllowAny]
 
